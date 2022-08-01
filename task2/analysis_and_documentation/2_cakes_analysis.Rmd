@@ -1,0 +1,83 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# Libraries
+
+```{r}
+library(tidyverse)
+```
+
+# Data
+
+```{r}
+here::here()
+cakes <- read_csv(here::here("clean_data/tidy_cakes.csv"))
+```
+
+
+# Q1 - Which cake has the most cocoa in it?
+
+One bowl chocolate
+
+```{r}
+cakes %>% 
+  filter(ingredient == "Cocoa") %>% #Filter for cakes containing cocoa
+  arrange(desc(amount)) #Arrange in descending order
+```
+
+# Q2 - For sponge cake, how many cups of ingredients are used in total?
+
+3.5 cups
+
+```{r}
+cakes %>% 
+  #select Sponge cake ingredients that are measured in cups
+  filter(cake == "Sponge" & measure == "cup") %>% 
+  #Sum the total amount of ingredients measured in cups
+  summarise(sum(amount))
+```
+
+# Q3 - How many ingredients are measured in teaspoons?
+
+45
+
+```{r}
+cakes %>% 
+  select(ingredient, measure) %>% 
+#Select rows where ingredients are not duplicated and are measured in teaspoons
+  filter(!duplicated(ingredient) & measure == "teaspoon") %>% 
+#Count the number of rows
+  summarise(num_teaspoons = n())
+```
+
+# Q4 - Which cake has the most unique ingredients?
+
+Angel
+
+```{r}
+#Find unique ingredients and assign to new variable
+unique_ingredients <- cakes %>% 
+#group cakes by ingredient
+  group_by(ingredient) %>% 
+#count number of times each ingredient is used
+  summarise(num_times_used = n()) %>% 
+#filter so that only ingredients used once are included
+  filter(num_times_used == 1)
+
+#Join unique ingredients table with cakes table to find cakes with unique ingredients
+inner_join(cakes, unique_ingredients, "ingredient") %>% 
+#group by cake
+  group_by(cake) %>% 
+#count the number of unique ingredients each cake contains
+  summarise(num_unique_ingredients = n())
+```
+
+# Q5 - Which ingredients are used only once?
+Bananas, cream of tartar, crushed ice, dried currants, egg white, nutmeg, nuts, zwiebach
+
+```{r}
+#Call the unique_ingredients table
+unique_ingredients
+```
+
