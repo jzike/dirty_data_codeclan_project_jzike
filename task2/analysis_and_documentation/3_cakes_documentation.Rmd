@@ -1,0 +1,84 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# 1. Introduction to the dataset
+
+The dataset contains information about cake ingredients for a variety of cakes, including the type of measure and the amount of each ingredient. The dataset is in long format and contains the columns "cake", "ingredient_code", "ingredient", "measure", and "amount".
+
+# 2. List of assumptions
+
+1) Assume that cakes that had NA in the amount column of an ingredient didn't contain that ingredient
+2) That NAs in the amount column for the ingredient "Sour cream cup" were measured in cups.
+3) That "one" in the measure column means one unit of whatever ingredient is listed because this is present in ingredients like "banana" and "egg".
+
+# 3. Steps taken to clean the data
+
+Note: The code chunks below are for explanation only and won't work, use the 1_clean_cakes_data.R file.
+
+## 1) Convert data to long form
+
+Data needed to be pivoted longer so that ingredients were in one column and amounts were in a separate column.
+
+```{r}
+# Pivot data longer - move ingredients to a column and amounts to a separate column
+cake_ingredients_long <- cake_ingredients %>% 
+  pivot_longer(
+    cols = AE:ZH,
+    names_to = "ingredient_code",
+    values_to = "amount"
+  )
+```
+## 2) Join tables
+
+Only ingredient codes were in the main dataset, so I joined the ingredient code dataset so that the clean dataset would include ingredient names and the type of measure for each. 
+
+```{r}
+# Join with cake codes to get ingredient names and type of measure for each
+cakes_joined <- cake_ingredients_long %>% 
+  left_join(cake_codes, by = c("ingredient_code" = "code")) %>% 
+  janitor::clean_names()
+```
+
+## 3) Find and deal with missing values
+
+There were two main columns that contained missing values: "amount" and "measure". I assumed that NAs in "amount" meant that the cake didn't contain that ingredient, so these rows were dropped
+
+```{r}
+cakes_joined <- cakes_joined  %>% 
+  filter(!is.na(amount))
+```
+
+I explored NAs in the measure section and found that these were only present for the ingredient "Sour cream cup", so I assumed that this ingredient was measured in cups, but that the information had been mistakenly recorded in the ingredient column.
+
+```{r}
+#Replaces NAs in measure section with "cup"
+cakes_imputed <- cakes_joined %>% 
+  mutate(measure = coalesce(measure, "cup"))
+```
+
+# 4. Answers to task brief questions
+
+## 1) Which cake has the most cocoa in it?
+
+The one bowl chocolate cake has the most cocoa in it.
+
+## 2) For sponge cake, how many cups of ingredients are used in total?
+
+For sponge cake, there are 3 ingredients that are measured in cups: sifted flour, granulated sugar and water. When summed up, 3.5 cups of ingredients are used in total.
+
+## 3) How many ingredients are measured in teaspoons?
+
+8 unique ingredients are measured in teaspoons
+
+## 4) Which cake has the most unique ingredients?
+
+Note: Assuming that this question means to find the cake that uses the highest number of ingredients that are not used in any other cake.
+
+The angel cake has the most unique ingredients
+
+## 5) Which ingredients are used only once?
+
+Bananas, cream of tartar, crushed ice, dried currants, egg white, nutmeg, nuts, and  zwiebach are used only once
+
