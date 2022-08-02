@@ -143,25 +143,73 @@ candy_2017_long <- candy_2017_long %>%
 
 #Bind rows----
 
+candy_clean <- bind_rows(candy_2015_long, candy_2016_long, candy_2017_long)
+
+candy_clean %>% 
+  distinct(country) %>% 
+  view()
+
+# Clean columns ----
+# Main columns that need cleaning - age, gender, country, candy
+
+## Age ----
+# Age is in character format and needs to be in numeric format
+#1) Deal with problematic values that don't contain numbers
+
+#Identifies strings without numbers and changes them to "NA"
+candy_clean <- candy_clean %>% 
+ mutate(
+  age = 
+   if_else(str_detect(age, "[:digit:]", negate = TRUE) == TRUE, "NA", age)
+) 
+#Changes "NA" to NA
+candy_clean <- candy_clean %>% 
+  mutate(age = na_if(age, "NA"))
+
+candy_clean %>% 
+  distinct(age) %>% 
+  view()
+
+#Confusing values
+#These values need to be changed individually - they contain an age, but also something that will make it difficult to extract the correct age (e.g. the age of their child)
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    age = 
+      if_else(age == "45, but the 8-year-old Huntress and bediapered Unicorn give me political cover and social respectability.  However, I WILL eat more than they do combined.", "45", age))
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    age = 
+      if_else(age == "5 months", NA_character_ , age))
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    age = 
+      if_else(age == "50, taking a 13 year old.", "50" , age))
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    age = 
+      if_else(age == "49 11/12ths", "49" , age))
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    age = 
+      if_else(age == "45-55", "50" , age))
 
 
+#remove characters
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    age = str_remove_all(age, "[:alpha:]")
+  )
 
 
 #Round age in all datasets
 ## Age is a character variable
 ## Change values without digits to "NA" and then use na_if to change them to NA
-
-
-#candy_2016_ <- candy_2016_ %>% 
- # mutate(
-  #  age = 
-   #   if_else(str_detect(age, "[:digit:]", negate = TRUE) == TRUE, "NA", age)
-  #) 
-
-#candy_2016_ <- candy_2016_ %>% 
- # mutate(age = na_if(age, "NA"))
-
-
 
 #Change age into numeric variable
 
