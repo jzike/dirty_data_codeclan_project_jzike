@@ -145,32 +145,26 @@ candy_2017_long <- candy_2017_long %>%
 
 candy_clean <- bind_rows(candy_2015_long, candy_2016_long, candy_2017_long)
 
-candy_clean %>% 
-  distinct(country) %>% 
-  view()
+
 
 # Clean columns ----
 # Main columns that need cleaning - age, gender, country, candy
 
 ## Age ----
 # Age is in character format and needs to be in numeric format
-#1) Deal with problematic values that don't contain numbers
+### 1) Deal with problematic values that don't contain numbers----
 
-#Identifies strings without numbers and changes them to "NA"
+#Identifies strings without numbers and changes them to NA
 candy_clean <- candy_clean %>% 
  mutate(
   age = 
-   if_else(str_detect(age, "[:digit:]", negate = TRUE) == TRUE, "NA", age)
+   if_else(str_detect(age, "[:digit:]", negate = TRUE) == TRUE, 
+           NA_character_, age)
 ) 
-#Changes "NA" to NA
-candy_clean <- candy_clean %>% 
-  mutate(age = na_if(age, "NA"))
 
-candy_clean %>% 
-  distinct(age) %>% 
-  view()
 
-#Confusing values
+
+### 2) Deal with confusing values----
 #These values need to be changed individually - they contain an age, but also something that will make it difficult to extract the correct age (e.g. the age of their child)
 
 candy_clean <- candy_clean %>% 
@@ -181,7 +175,7 @@ candy_clean <- candy_clean %>%
 candy_clean <- candy_clean %>% 
   mutate(
     age = 
-      if_else(age == "5 months", NA_character_ , age))
+      if_else(age == "5 months", NA_character_ , age))#A 5 month old can't take a survey, this could be the parent, but we can't logically guess how old they are, so needs to change to NA
 
 candy_clean <- candy_clean %>% 
   mutate(
@@ -196,22 +190,45 @@ candy_clean <- candy_clean %>%
 candy_clean <- candy_clean %>% 
   mutate(
     age = 
-      if_else(age == "45-55", "50" , age))
+      if_else(age == "45-55", "50" , age))#This age range can't be converted to numeric, instead I've chosen the number in the middle of the range.
 
 
-#remove characters
+### 3) Remove characters from ages----
+#Now that I have dealt with confusing values, I can remove characters from the values without having confusing values in some cells.
 
 candy_clean <- candy_clean %>% 
   mutate(
     age = str_remove_all(age, "[:alpha:]")
   )
 
+### 4) Remove all punctuation except "." and blank spaces----
+#We can't remove "." yet because it is a decimal point in a large part of the data
+candy_clean <- candy_clean %>% 
+  mutate(
+    age = str_remove_all(age, "[-＋,>^'+!-():[:blank:]]")
+  ) 
 
-#Round age in all datasets
-## Age is a character variable
-## Change values without digits to "NA" and then use na_if to change them to NA
+### 5) Extract everything before the "." ----
+candy_clean <- candy_clean %>% 
+  mutate(
+    age = str_extract(age, "[^.]+"))
 
-#Change age into numeric variable
+### 6) Change age to numeric variable ----
+#Changing age to numeric loses 2 distinct age values. One of these is the problematic "７１＋" which didn't respond to any stringr manipulation. Not sure what the other one was, but it is likely that it was another problematic value. At most, we have lost age data for 2 participants, which is not very significant considering the size of the dataset
+candy_clean <- candy_clean %>% 
+  mutate(age = as.numeric(age)) 
+
+
+### 7) Fix outliers ----
+#The candy dataset still has some problematic numbers that are making the Mean and Max values "infinite". We need to work with the mean for the analysis questions, so this is a problem. The oldest person in the world lived to be 122, so I have chosen to replace all values over 122 with the median value.
+
+candy_clean <- candy_clean %>% 
+  mutate(age = if_else(age > 122, median(age), age))
+  
+## Gender ----
+
+
+## Country ----
 
 
 
