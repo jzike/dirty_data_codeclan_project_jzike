@@ -40,7 +40,7 @@ cakes %>%
 
 # Q3 - How many ingredients are measured in teaspoons?
 
-45
+8
 
 ```{r}
 cakes %>% 
@@ -49,6 +49,12 @@ cakes %>%
   filter(!duplicated(ingredient) & measure == "teaspoon") %>% 
 #Count the number of rows
   summarise(num_teaspoons = n())
+
+#Second way using the distinct fuction
+#cakes %>% 
+  #filter(measure == "teaspoon") %>% 
+  #distinct(ingredient) %>% 
+  #count()
 ```
 
 # Q4 - Which cake has the most unique ingredients?
@@ -56,7 +62,7 @@ cakes %>%
 Angel
 
 ```{r}
-#Find unique ingredients and assign to new variable
+#Find unique ingredients and assign to new object
 unique_ingredients <- cakes %>% 
 #group cakes by ingredient
   group_by(ingredient) %>% 
@@ -81,3 +87,12 @@ Bananas, cream of tartar, crushed ice, dried currants, egg white, nutmeg, nuts, 
 unique_ingredients
 ```
 
+# Q6 - Mean number of ingredients in a single cake
+
+```{r}
+cakes %>% 
+  select(cake, ingredient) %>% 
+  group_by(cake) %>% 
+  summarise(num_ingredients = n()) %>% 
+  summarise(mean(num_ingredients))
+```

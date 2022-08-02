@@ -82,3 +82,7 @@ The angel cake has the most unique ingredients
 
 Bananas, cream of tartar, crushed ice, dried currants, egg white, nutmeg, nuts, and  zwiebach are used only once
 
+# 5. Additional analysis
+
+## 1) What is the mean number of ingredients in a cake?
+8.67
