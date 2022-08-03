@@ -1,0 +1,161 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Libraries
+
+```{r}
+library(tidyverse)
+```
+
+# Read data
+
+```{r}
+here::here()
+
+candy_clean <- read_csv(here::here("clean_data/candy_clean.csv"))
+
+```
+
+# Analysis questions
+
+## Q1) What is the total number of candy ratings given across the three years. 
+(Number of candy ratings, not the number of raters. Don’t count missing values)
+
+772,352 candy ratings in total
+
+```{r}
+candy_clean %>% 
+  select(rating) %>% 
+  drop_na(rating) %>% 
+  summarise(num_ratings = n())
+  
+```
+
+## Q2) What was the average age of people who are going out trick or treating?
+
+Mean age of trick-or-treaters is 35
+
+```{r}
+candy_clean %>% 
+  select(age, going_out) %>% 
+  filter(going_out == "Yes") %>% 
+  drop_na(age) %>% 
+  summarise(mean_age_going_out = mean(age))
+```
+
+
+## Q3) What was the average age of people who are not going trick or treating?
+
+Mean age of non trick-or-treaters is 39
+
+```{r}
+candy_clean %>% 
+  select(age, going_out) %>% 
+  filter(going_out == "No") %>% 
+  drop_na(age) %>% 
+  summarise(mean_age_staying_in = mean(age))
+```
+
+
+## Q4) For each of joy, despair and meh, which candy bar received the most of these ratings?
+
+Broken glow stick received the most "despair" ratings
+Any full-sized candy bar received the most "joy" ratings
+Lollipops received the most "meh" ratings
+
+```{r}
+candy_clean %>% 
+  select(candy, rating) %>% 
+  group_by(rating, candy) %>% 
+  summarise(num_ratings = n()) %>% 
+  arrange(rating, desc(num_ratings), candy) %>% 
+  slice_max(order_by = num_ratings, n = 1)
+```
+
+
+## Q5) How many people rated Starburst as despair?
+
+1990 people rated Starburst as despair.
+
+```{r}
+candy_clean %>% 
+  select(candy, rating) %>% 
+  filter(candy == "Starburst" & rating == "DESPAIR") %>% 
+  summarise(num_despair = n())
+```
+
+
+## Add numeric rating variable for next questions
+
+```{r}
+candy_clean <- candy_clean %>% 
+  mutate(rating_numeric = case_when(
+    rating == "DESPAIR" ~ -1,
+    rating == "JOY" ~ 1,
+    rating == "MEH" ~ 0
+  )
+  )
+```
+
+## Q6) What was the most popular candy bar by this rating system for each gender in the dataset ?
+
+For participants of all genders (male, female and unknown), Any full-sized candy bar was the most popular candy bar.
+
+When full-sized candy bars are discounted:
+-Female participants prefer cash
+-Male participants prefer Reese's peanut butter cups
+-Unknown gender participants prefer cash
+
+```{r}
+candy_clean %>% 
+  select(gender, candy, rating_numeric) %>% 
+  drop_na(rating_numeric) %>% 
+  group_by(gender, candy) %>% 
+  summarise(sum_rating = sum(rating_numeric)) %>% 
+  slice_max(order_by = sum_rating, n = 2)
+```
+
+
+
+## Q7) What was the most popular candy bar in each year?
+
+For every year, Any full-sized candy bar was the most popular candy bar
+
+When full sized candy bars are discounted:
+- Reese's peanut butter cups were most popular in 2015
+- Cash was most popular in 2016
+- Reese's peanut butter cups were most popular in 2017
+
+```{r}
+candy_clean %>% 
+  select(year, candy, rating_numeric) %>% 
+  drop_na(rating_numeric) %>% 
+  group_by(year, candy) %>% 
+  summarise(sum_rating = sum(rating_numeric)) %>% 
+  slice_max(order_by = sum_rating, n = 2)
+```
+
+## Q8) What was the most popular candy bar by this rating for people in US, Canada, UK, and all other countries?
+
+For Canada, the USA and all other countries, Any full-sized candy bar was the most popular candy bar. For the UK, Cash was the most popular item. The most popular candy bar was a four-way tie between:
+-any full-sized candy bar
+-Lindt truffles
+-Rolo
+-Toblerone
+
+When full-sized candy bars are discounted:
+-Americans prefer Reese's peanut butter cups
+-Canadians prefer KitKats
+-People from any other country prefer Reese's peanut butter cups
+
+```{r}
+candy_clean %>% 
+  select(country, candy, rating_numeric) %>% 
+  drop_na(rating_numeric) %>% 
+  group_by(country, candy) %>% 
+  summarise(sum_rating = sum(rating_numeric)) %>% 
+  slice_max(order_by = sum_rating, n = 2)
+```
+
