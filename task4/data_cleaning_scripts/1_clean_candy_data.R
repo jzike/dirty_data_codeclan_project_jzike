@@ -227,8 +227,195 @@ candy_clean <- candy_clean %>%
   
 ## Gender ----
 
+### 1) Combine unknown genders into one value----
+
+unknown_genders <- c("Other", "I'd rather not say")
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    gender = 
+      if_else(gender %in% unknown_genders, "Unknown", gender))
 
 ## Country ----
 
+
+### 1) Change country into title format ----
+#To combine some values that are separate due to differences in case.
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    country = str_to_title(country)
+  )
+
+### 2) Combine same country, different spelling values for analysis countries ----
+
+#Assign all distinct values that are USA to a vector
+america_pseudos <- c(
+  "Usa",
+  "Us",
+  "United States Of America",
+  "United States",
+  "Ussa",
+  "U.s.a.",
+  "Murica",
+  "Usa!",
+  "Usa (I Think But It's An Election Year So Who Can Really Tell)",
+  "U.s.",
+  "America",
+  "Units States",
+  "Usa Usa Usa",
+  "The Best One - Usa",
+  "Usa! Usa! Usa!",
+  "The Yoo Ess Of Aaayyyyyy",
+  "Usa!!!!!!",
+  "Usa! Usa!",
+  "United Sates",
+  "Sub-Canadian North America... 'Merica",
+  "Trumpistan",
+  "Merica",
+  "United Stetes",
+  "Usa Usa Usa Usa",
+  "United  States Of America",
+  "United State",
+  "United Staes",
+  "Usausausa",
+  "Us Of A",
+  "Unites States",
+  "The United States",
+  "North Carolina",
+  "Unied States",
+  "U S",
+  "The United States Of America",
+  "Unite States",
+  "Usa? Hard To Tell Anymore..",
+  "'Merica",
+  "Usas",
+  "Pittsburgh",
+  "New York",
+  "California",
+  "I Pretend To Be From Canada, But I Am Really From The United States.",
+  "United Stated",
+  "Ahem....Amerca",
+  "United Statss",
+  "Murrika",
+  "Usaa",
+  "Alaska",
+  "U S A",
+  "United Statea",
+  "United Ststes",
+  "Usa Usa Usa!!!!",
+  "New Jersey"
+  )
+
+#Change names of all countries in USA vector to "USA"
+candy_clean <- candy_clean %>% 
+  mutate(
+    country = 
+      if_else(country %in% america_pseudos, "USA", country))
+
+#Assign all UK values to a vector
+uk_pseudos <- c(
+  "Uk",
+  "England",
+  "United Kingdom",
+  "United Kindom",
+  "U.k.",
+  "Scotland"
+)
+
+#Change all UK values to "UK"
+candy_clean <- candy_clean %>% 
+  mutate(
+    country = 
+      if_else(country %in% uk_pseudos, "UK", country))
+
+#Assign all Canada values to a vector
+canada_pseudos <- c(
+  "Canada",
+  "Can",
+  "Canae",
+  "Canada`",
+  "Soviet Canuckistan"
+)
+
+#Change all Canada values to "Canada"
+candy_clean <- candy_clean %>% 
+  mutate(
+    country = 
+      if_else(country %in% canada_pseudos, "Canada", country))
+
+### 3) Change other country names to "other country" ----
+#Note that I have interpreted analysis question 8 to mean that I only need four country categories for the analysis - US, Canada, UK and other countries
+
+#Assign analysis countries to a vector
+analysis_countries <- c("USA",
+                        "UK",
+                        "Canada")
+
+#Change all country names not in analysis_countries to "Other country"
+candy_clean <- candy_clean %>% 
+  mutate(
+    country = 
+      if_else(country %in% analysis_countries, country, "Other country"))
+
+
+## Candy ----
+
+
+### 1) Remove square brackets from candy names----
+
+candy_clean <- candy_clean %>% 
+  mutate(candy = if_else(grepl("]", candy), str_sub(candy, 2, nchar(candy) - 1), candy ))
+
+### 2) Remove "Q6 | " from candy names----
+
+candy_clean <- candy_clean %>% 
+  mutate(candy = if_else(grepl("Q6", candy), str_sub(candy, 5, nchar(candy)), candy )) 
+
+### 3) Trim any white space before/after values in candy ----
+
+candy_clean <- candy_clean %>% 
+  mutate(candy = str_trim(candy, side = "both"))
+
+
+### 4) Rename duplicate values in candy ----
+#Sometimes the candy names differ slightly between datasets and should be combined.
+
+#Change Dark Chocolate Hershey to Hershey's Dark Chocolate so that 2015 dataset matches the others
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    candy = 
+      if_else(candy == "Dark Chocolate Hershey", 
+              "Hershey's Dark Chocolate", 
+              candy)) 
+
+#Change JoyJoy (Mit Iodine) to JoyJoy (Mit Iodine!) so that 2015 dataset matches the others
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    candy = 
+      if_else(candy == "JoyJoy (Mit Iodine)", 
+              "JoyJoy (Mit Iodine!)", 
+              candy)) 
+
+#Change Sweetums to Sweetums (a friend to diabetes) so that 2015 dataset matches the others
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    candy = 
+      if_else(candy == "Sweetums", 
+              "Sweetums (a friend to diabetes)", 
+              candy)) 
+
+#Change "Anonymous brown globs that come in black and orange wrappers	(a.k.a. Mary Janes)" to "Mary Janes" so that 2017 dataset matches the others. The other datasets have separate candies for "Anonymous brown globs..." and "Mary Janes", but the 2017 dataset doesn't have a separate Mary Janes candy and states that the Anonymous brown globs are Mary Janes
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    candy = 
+      if_else(candy == 
+      "Anonymous brown globs that come in black and orange wrappers	(a.k.a. Mary Janes)", 
+              "Mary Janes", 
+              candy)) 
 
 
