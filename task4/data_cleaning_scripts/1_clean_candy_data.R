@@ -408,6 +408,15 @@ candy_clean <- candy_clean %>%
               "Sweetums (a friend to diabetes)", 
               candy)) 
 
+#Change Box’o’ Raisins in the 2015 dataset to remove the space so that it matches the others
+
+candy_clean <- candy_clean %>% 
+  mutate(
+    candy = 
+      if_else(candy == "Box’o’ Raisins", 
+              "Box'o'Raisins", 
+              candy))
+
 #Change "Anonymous brown globs that come in black and orange wrappers	(a.k.a. Mary Janes)" to "Mary Janes" so that 2017 dataset matches the others. The other datasets have separate candies for "Anonymous brown globs..." and "Mary Janes", but the 2017 dataset doesn't have a separate Mary Janes candy and states that the Anonymous brown globs are Mary Janes
 
 candy_clean <- candy_clean %>% 
@@ -418,4 +427,5 @@ candy_clean <- candy_clean %>%
               "Mary Janes", 
               candy)) 
 
-
+# Write clean data to CSV ----
+write_csv(candy_clean, "clean_data/candy_clean.csv")
