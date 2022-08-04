@@ -9,6 +9,7 @@ The finished and cleaned dataset contains survey data from 9270 participants con
 There is data from participants for the years 2015, 2016 and 2017. The 2015 dataset is missing information on the participant's gender and country, so these have been populated with NAs in the combined dataset.
 
 The combined dataset is in long format and contains 8 variables - 
+
 1) participant_id (char) - unique id for each participant
 2) year (numeric) - year data was collected
 3) age (numeric) - age of participant
@@ -29,6 +30,7 @@ The combined dataset is in long format and contains 8 variables -
 3) That participants were reporting the ratings for their own candy preferences and not for another person (e.g. their child)
 
 4) That the analysis question asking about the most popular candy bar for the USA, UK, Canada and all other countries was asking for countries that weren't USA, UK or Canada (or NA) to be grouped together into an "other country" category.
+
 
 # 3) Steps taken to clean the data
 
@@ -80,10 +82,11 @@ There were four variables that needed to be targeted for cleaning:
 -gender,
 -candy
 
-### 1) Age
+### -- Age
 Age was in character format and it was clear that participants were able to type their age into a free-form text box. This meant there were many problematic values preventing a straightforward change to numeric format. This data needed to be changed to numeric form in order to answer the analysis questions.
 
 There were 7 primary steps to clean "age" after exploring distinct values:
+
 #### 1.  Identify values with no numbers and change to NA
 
 #### 2. Target confusing values (e.g. values with two ages in) with hard-coding - this needed to be done before removing characters because removing the characters would have resulted in confusing and misleading values.
@@ -98,10 +101,10 @@ There were 7 primary steps to clean "age" after exploring distinct values:
 
 #### 7. Deal with outliers - some problematic numbers were making the Mean and Max values "infinite". The mean was needed for the analysis questions, so this is a problem. The oldest person in the world lived to be 122, so I chose to replace all values over 122 with the median value.
 
-### 2) Gender
+### -- Gender
 Gender was cleaned by assigning unknown values to a third category called "Unknown"
 
-### 3) Country
+### -- Country
 Considering my assumptions above, four country categories were needed for analysis:
 -USA
 -UK
@@ -109,6 +112,7 @@ Considering my assumptions above, four country categories were needed for analys
 -Other country
 
 Three steps were taken to clean the data to reflect these three categories
+
 #### 1. All values were converted to title case to combine some values with differences in case.
 
 #### 2. Combine same country, different spelling values for analysis countries.
@@ -124,22 +128,23 @@ candy_clean <- candy_clean %>%
       TRUE ~ "Other country"))
 ```
 
-### 4) Candy
+### -- Candy
 
 Candy names still contained brackets and question numbers from their formatting before they were pivoted. The candy names needed to be examined to ensure that there weren't spelling differences between the ways that candies were named in different datasets before they were combined.
 
 4 steps were needed to clean candy names
- #### 1. Remove square brackets from candy names
 
- #### 2. Remove "Q6 | " from candy names
+#### 1. Remove square brackets from candy names
+
+#### 2. Remove "Q6 | " from candy names
  
- #### 3. Trim any white space before/after values in candy
+#### 3. Trim any white space before/after values in candy
  
- #### 4. Rename duplicate values in candy
+#### 4. Rename duplicate values in candy
  After the previous 3 steps, distinct values were examined and 5 duplicate values were identified and changed to ensure consistency across the three years in the datasets. This was necessary in order to group ratings accurately by candy, which was required in the analysis questions.
 
 
-#4) Answers to task brief questions
+# 4) Answers to task brief questions
 
 ## 1. What is the total number of candy ratings given across the three years. (Number of candy ratings, not the number of raters. Don’t count missing values)
 
