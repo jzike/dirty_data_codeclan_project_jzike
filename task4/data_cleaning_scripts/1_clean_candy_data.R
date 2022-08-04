@@ -355,8 +355,12 @@ analysis_countries <- c("USA",
 #Change all country names not in analysis_countries to "Other country"
 candy_clean <- candy_clean %>% 
   mutate(
-    country = 
-      if_else(country %in% analysis_countries, country, "Other country"))
+    country = case_when(
+      country %in% analysis_countries ~ country,
+      is.na(country) ~ NA_character_,
+      TRUE ~ "Other country"))
+
+
 
 
 ## Candy ----
