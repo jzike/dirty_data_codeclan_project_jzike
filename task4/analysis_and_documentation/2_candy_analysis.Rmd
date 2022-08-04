@@ -27,8 +27,11 @@ candy_clean <- read_csv(here::here("clean_data/candy_clean.csv"))
 
 ```{r}
 candy_clean %>% 
+  #selects ratings
   select(rating) %>% 
+  #drops nas so that they're not included in the count
   drop_na(rating) %>% 
+  #counts the number of ratings
   summarise(num_ratings = n())
   
 ```
@@ -40,8 +43,11 @@ Mean age of trick-or-treaters is 35
 ```{r}
 candy_clean %>% 
   select(age, going_out) %>% 
+  #filters data to only include those going out
   filter(going_out == "Yes") %>% 
+  #drops NAs in the age variable so that mean can be calculated
   drop_na(age) %>% 
+  #computes the mean age
   summarise(mean_age_going_out = mean(age))
 ```
 
@@ -53,8 +59,11 @@ Mean age of non trick-or-treaters is 39
 ```{r}
 candy_clean %>% 
   select(age, going_out) %>% 
+  #filters data to only those not going out
   filter(going_out == "No") %>% 
+  #drops NAs in age so mean can be calculated
   drop_na(age) %>% 
+  #calculates the mean age
   summarise(mean_age_staying_in = mean(age))
 ```
 
@@ -68,9 +77,11 @@ Lollipops received the most "meh" ratings
 ```{r}
 candy_clean %>% 
   select(candy, rating) %>% 
+  #groups by ratings and then type of candy
   group_by(rating, candy) %>% 
+  #counts the number of ratings for each rating category for each candy
   summarise(num_ratings = n()) %>% 
-  arrange(rating, desc(num_ratings), candy) %>% 
+  #takes the highest rated candy for each rating.
   slice_max(order_by = num_ratings, n = 1)
 ```
 
@@ -82,7 +93,9 @@ candy_clean %>%
 ```{r}
 candy_clean %>% 
   select(candy, rating) %>% 
+  #filters data to only include Starburst and "despair" ratings
   filter(candy == "Starburst" & rating == "DESPAIR") %>% 
+  #counts the number of rows(aka despair ratings)
   summarise(num_despair = n())
 ```
 
@@ -91,10 +104,13 @@ candy_clean %>%
 
 ```{r}
 candy_clean <- candy_clean %>% 
+  #create a new column for a numeric version of rating
   mutate(rating_numeric = case_when(
+    #sets values for despair, joy and meh ratings
     rating == "DESPAIR" ~ -1,
     rating == "JOY" ~ 1,
     rating == "MEH" ~ 0
+    #NAs will reach the end and not be assigned a numeric value
   )
   )
 ```
@@ -115,9 +131,13 @@ Since cash is not a candy bar, female and unknown gender participants were analy
 ```{r}
 candy_clean %>% 
   select(gender, candy, rating_numeric) %>% 
+  #drop rows where rating is NA so that they can be summed
   drop_na(rating_numeric) %>% 
+  #groups by gender and then candy
   group_by(gender, candy) %>% 
+  #sums the numeric rating for each candy by gender
   summarise(sum_rating = sum(rating_numeric)) %>% 
+  #takes the top 3 candys and their ratings for each gender
   slice_max(order_by = sum_rating, n = 3)
 ```
 
@@ -137,9 +157,13 @@ Since cash is not a candy bar, 2016 was examined further and KitKat was the most
 ```{r}
 candy_clean %>% 
   select(year, candy, rating_numeric) %>% 
+  #drops NAs in numeric rating so sum can be calculated
   drop_na(rating_numeric) %>% 
+  #groups by year and then candy
   group_by(year, candy) %>% 
+  #sums the numeric ratings for each candy for every year
   summarise(sum_rating = sum(rating_numeric)) %>% 
+  #takes the top three candies and their ratings for each year
   slice_max(order_by = sum_rating, n = 3)
 ```
 
@@ -161,9 +185,13 @@ Since cash is not a candy bar, "other country" was further examined and KitKat w
 ```{r}
 candy_clean %>% 
   select(country, candy, rating_numeric) %>% 
+  #drops NAs in numeric rating so sum can be calculated
   drop_na(rating_numeric) %>% 
+  #groups by country and then candy
   group_by(country, candy) %>% 
+  #takes the sum of numeric ratings for each candy for each country
   summarise(sum_rating = sum(rating_numeric)) %>% 
+  #takes the top 3 candies and their ratings for each year.
   slice_max(order_by = sum_rating, n = 3)
 ```
 
