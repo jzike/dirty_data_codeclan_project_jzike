@@ -139,7 +139,7 @@ candy_clean %>%
 
 ## Q8) What was the most popular candy bar by this rating for people in US, Canada, UK, and all other countries?
 
-For Canada, the USA and all other countries, Any full-sized candy bar was the most popular candy bar. For the UK, Cash was the most popular item. The most popular candy bar was a four-way tie between:
+For Canada, the USA and all other countries, Any full-sized candy bar was the most popular candy bar. For the UK, cash was the most popular item. The most popular candy bar was a four-way tie between:
 -any full-sized candy bar
 -Lindt truffles
 -Rolo
@@ -148,7 +148,7 @@ For Canada, the USA and all other countries, Any full-sized candy bar was the mo
 When full-sized candy bars are discounted:
 -Americans prefer Reese's peanut butter cups
 -Canadians prefer KitKats
--People from any other country prefer Reese's peanut butter cups
+-People from any other country prefer cash.
 
 ```{r}
 candy_clean %>% 
@@ -158,4 +158,6 @@ candy_clean %>%
   summarise(sum_rating = sum(rating_numeric)) %>% 
   slice_max(order_by = sum_rating, n = 2)
 ```
+
+
 
