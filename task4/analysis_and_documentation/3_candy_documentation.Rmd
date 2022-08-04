@@ -1,0 +1,221 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# 1) Introduction to the dataset
+
+The finished and cleaned dataset contains survey data from 9270 participants containing demographic data and their ratings for a variety of different candies/items that they might receive when going trick or treating. The rating scale for each item was a three-point scale consisting of despair, meh, and joy. 
+
+There is data from participants for the years 2015, 2016 and 2017. The 2015 dataset is missing information on the participant's gender and country, so these have been populated with NAs in the combined dataset.
+
+The combined dataset is in long format and contains 8 variables - 
+1) participant_id (char) - unique id for each participant
+2) year (numeric) - year data was collected
+3) age (numeric) - age of participant
+4) going_out (char) - yes/no information on whether participant was going trick-or-treating
+5) gender (char) - participants' gender (male, female, other gender)
+6) country (char) - participants' country containing 4 categories (USA, UK, Canada, Other country)
+7) candy (char) - name of candy or other trick or treat item
+8) rating (char) - participant-assigned rating on three-point scale
+
+
+
+# 2) List of assumptions
+
+1) That the data was cross-sectional for each year and not longitudinal (e.g. not collected from the same participants over multiple years).
+
+2) That any participants over the age of 122 had misreported their age. The oldest person only lived to be 122, so participants over this age had their ages changed to the median age.
+
+3) That participants were reporting the ratings for their own candy preferences and not for another person (e.g. their child)
+
+4) That the analysis question asking about the most popular candy bar for the USA, UK, Canada and all other countries was asking for countries that weren't USA, UK or Canada (or NA) to be grouped together into an "other country" category.
+
+# 3) Steps taken to clean the data
+
+Note: Any code chunks below are for explanation only and won't work, please use the 1_clean_candy_data.R file
+
+## 1) Select variables needed for analysis in each of the datasets.
+
+I dropped columns not related to candy or variables needed in analysis questions. Variables required for analysis were:
+- year, 
+- age,
+- going_out,
+- gender, 
+- country, 
+- candy, 
+- rating
+
+## 2) Prepare individual datasets for combining
+
+-I renamed the variables in individual datasets so they were consistent. 
+
+-I added a gender and country column to the 2015 dataset since this was missing and populated it with NAs since it wouldn't have been appropriate to impute these values and populating the wrong values could impact the analysis.
+
+-I added a year column to each dataset and a participant ID. Participant ID was added to identify unique participants so that it was clear where each participant's ratings ended and the next began. This also made it possible to identify the number of participants in the finished dataset. The year column was necessary to compare data between different years.
+
+
+-Each dataset was converted to long format so that candy and rating had their own columns.
+
+-I used select to order the variables in each dataset so that they were in the same order.
+
+- To reduce the size of the finished dataset, I dropped rows that were primarily NAs. If a row doesn't have a value in age, going out and rating, it was dropped. This is because the analysis questions were primarily interested in ratings and connections between age and trick or treating. Keeping rows without this data would just increase the size of the table without adding useable data.
+
+```{r}
+candy_2017_long <- candy_2017_long %>% 
+  filter(!is.na(rating) | (!is.na(age) & !is.na(going_out)))
+
+candy_2016_long <- candy_2016_long %>% 
+  filter(!is.na(rating) | (!is.na(age) & !is.na(going_out)))
+
+candy_2015_long <- candy_2015_long %>% 
+  filter(!is.na(rating) | (!is.na(age) & !is.na(going_out)))
+```
+
+
+## 3) Clean variables in combined dataset
+
+There were four variables that needed to be targeted for cleaning: 
+-age,
+-country,
+-gender,
+-candy
+
+### 1) Age
+Age was in character format and it was clear that participants were able to type their age into a free-form text box. This meant there were many problematic values preventing a straightforward change to numeric format. This data needed to be changed to numeric form in order to answer the analysis questions.
+
+There were 7 primary steps to clean "age" after exploring distinct values:
+#### 1.  Identify values with no numbers and change to NA
+
+#### 2. Target confusing values (e.g. values with two ages in) with hard-coding - this needed to be done before removing characters because removing the characters would have resulted in confusing and misleading values.
+
+#### 3. Remove characters from ages
+
+#### 4. Remove all punctuation except "." and blank spaces - full stops couldn't be removed at this stage because it is a decimal point in a large part of the data
+
+#### 5. Extract all numbers before the decimal point(".") 
+
+#### 6. Change age to numeric variable
+
+#### 7. Deal with outliers - some problematic numbers were making the Mean and Max values "infinite". The mean was needed for the analysis questions, so this is a problem. The oldest person in the world lived to be 122, so I chose to replace all values over 122 with the median value.
+
+### 2) Gender
+Gender was cleaned by assigning unknown values to a third category called "Unknown"
+
+### 3) Country
+Considering my assumptions above, four country categories were needed for analysis:
+-USA
+-UK
+-Canada
+-Other country
+
+Three steps were taken to clean the data to reflect these three categories
+#### 1. All values were converted to title case to combine some values with differences in case.
+
+#### 2. Combine same country, different spelling values for analysis countries.
+
+#### 3. Change other country names to "other country"
+```{r}
+#Change all country names not in analysis_countries to "Other country"
+candy_clean <- candy_clean %>% 
+  mutate(
+    country = case_when(
+      country %in% analysis_countries ~ country,
+      is.na(country) ~ NA_character_, #preserve NAs here since they are not "other country"
+      TRUE ~ "Other country"))
+```
+
+### 4) Candy
+
+Candy names still contained brackets and question numbers from their formatting before they were pivoted. The candy names needed to be examined to ensure that there weren't spelling differences between the ways that candies were named in different datasets before they were combined.
+
+4 steps were needed to clean candy names
+ #### 1. Remove square brackets from candy names
+
+ #### 2. Remove "Q6 | " from candy names
+ 
+ #### 3. Trim any white space before/after values in candy
+ 
+ #### 4. Rename duplicate values in candy
+ After the previous 3 steps, distinct values were examined and 5 duplicate values were identified and changed to ensure consistency across the three years in the datasets. This was necessary in order to group ratings accurately by candy, which was required in the analysis questions.
+
+
+#4) Answers to task brief questions
+
+## 1. What is the total number of candy ratings given across the three years. (Number of candy ratings, not the number of raters. Don’t count missing values)
+
+772,352 candy ratings in total
+
+## 2. What was the average age of people who are going out trick or treating?
+
+Mean age of trick-or-treaters is 35
+
+## 3. What was the average age of people who are not going trick or treating?
+
+Mean age of non trick-or-treaters is 39
+
+## 4. For each of joy, despair and meh, which candy bar received the most of these ratings?
+
+Broken glow stick received the most "despair" ratings
+Any full-sized candy bar received the most "joy" ratings
+Lollipops received the most "meh" ratings
+
+
+## 5. How many people rated Starburst as despair?
+
+1990 people rated Starburst as despair.
+
+
+## Add numeric rating variable for next questions
+A new numeric rating column was added where despair was counted as -1, joy as +1, and meh as 0.
+
+```{r}
+candy_clean <- candy_clean %>% 
+  mutate(rating_numeric = case_when(
+    rating == "DESPAIR" ~ -1,
+    rating == "JOY" ~ 1,
+    rating == "MEH" ~ 0
+  )
+  )
+```
+
+
+## 6. What was the most popular candy bar by this rating system for each gender in the dataset ?
+
+For participants of all genders (male, female and unknown), Any full-sized candy bar was the most popular candy bar.
+
+When full-sized candy bars are discounted:
+-Female participants prefer cash
+-Male participants prefer Reese's peanut butter cups
+-Unknown gender participants prefer cash
+
+Since cash is not a candy bar, female and unknown gender participants were analysed further and after cash, they preferred:
+-Female participants - Reese's peanut butter cups
+-Unknown gender participants - KitKats
+
+
+## 7. What was the most popular candy bar in each year?
+
+For every year, Any full-sized candy bar was the most popular candy bar
+
+When full sized candy bars are discounted:
+- Reese's peanut butter cups were most popular in 2015
+- Cash was most popular in 2016
+- Reese's peanut butter cups were most popular in 2017
+
+Since cash is not a candy bar, 2016 was examined further and KitKat was the most popular.
+
+
+## 8. What was the most popular candy bar by this rating for people in US, Canada, UK, and all other countries?
+
+For Canada, the USA and all other countries, Any full-sized candy bar was the most popular candy bar. For the UK, cash was the most popular item. The most popular candy bar was a four-way tie between:
+-any full-sized candy bar
+-Lindt truffles
+-Rolo
+-Toblerone
+
+When full-sized candy bars are discounted:
+-Americans prefer Reese's peanut butter cups
+-Canadians prefer KitKats
+-People from any other country prefer cash.
+
+Since cash is not a candy bar, "other country" was further examined and KitKat was the most popular
