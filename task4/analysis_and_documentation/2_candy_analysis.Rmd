@@ -108,13 +108,17 @@ When full-sized candy bars are discounted:
 -Male participants prefer Reese's peanut butter cups
 -Unknown gender participants prefer cash
 
+Since cash is not a candy bar, female and unknown gender participants were analysed further and after cash, they preferred:
+-Female participants - Reese's peanut butter cups
+-Unknown gender participants - KitKats
+
 ```{r}
 candy_clean %>% 
   select(gender, candy, rating_numeric) %>% 
   drop_na(rating_numeric) %>% 
   group_by(gender, candy) %>% 
   summarise(sum_rating = sum(rating_numeric)) %>% 
-  slice_max(order_by = sum_rating, n = 2)
+  slice_max(order_by = sum_rating, n = 3)
 ```
 
 
@@ -128,13 +132,15 @@ When full sized candy bars are discounted:
 - Cash was most popular in 2016
 - Reese's peanut butter cups were most popular in 2017
 
+Since cash is not a candy bar, 2016 was examined further and KitKat was the most popular.
+
 ```{r}
 candy_clean %>% 
   select(year, candy, rating_numeric) %>% 
   drop_na(rating_numeric) %>% 
   group_by(year, candy) %>% 
   summarise(sum_rating = sum(rating_numeric)) %>% 
-  slice_max(order_by = sum_rating, n = 2)
+  slice_max(order_by = sum_rating, n = 3)
 ```
 
 ## Q8) What was the most popular candy bar by this rating for people in US, Canada, UK, and all other countries?
@@ -150,13 +156,15 @@ When full-sized candy bars are discounted:
 -Canadians prefer KitKats
 -People from any other country prefer cash.
 
+Since cash is not a candy bar, "other country" was further examined and KitKat was the most popular
+
 ```{r}
 candy_clean %>% 
   select(country, candy, rating_numeric) %>% 
   drop_na(rating_numeric) %>% 
   group_by(country, candy) %>% 
   summarise(sum_rating = sum(rating_numeric)) %>% 
-  slice_max(order_by = sum_rating, n = 2)
+  slice_max(order_by = sum_rating, n = 3)
 ```
 
 
