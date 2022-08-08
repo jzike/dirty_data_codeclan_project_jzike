@@ -49,6 +49,7 @@ candy_clean %>%
   drop_na(age) %>% 
   #computes the mean age
   summarise(mean_age_going_out = mean(age))
+
 ```
 
 
@@ -65,6 +66,7 @@ candy_clean %>%
   drop_na(age) %>% 
   #calculates the mean age
   summarise(mean_age_staying_in = mean(age))
+
 ```
 
 

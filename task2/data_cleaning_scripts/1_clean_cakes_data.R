@@ -39,6 +39,8 @@ cakes_joined <- cakes_joined  %>%
 
 cakes_imputed <- cakes_joined %>% 
   mutate(measure = coalesce(measure, "cup"))
+#Probably should have used an if_else here if there was a potential for the cleaning code to be used on another dataset because this code would change all NAs in measure to cup, not just ones in 
+
 
 # 5. Write clean data csv ----
 
